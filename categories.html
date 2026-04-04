@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories | Wolt</title>
+    <link rel="shortcut icon" href="https://careers.wolt.com/favicon.ico" type="image/x-icon">
+    <link href="./assets/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    
+    <header>
+    </header>
+
+    <main class=" bg-linear-to-r to-cyan-500 from-blue-600 py-10">
+        <div class="container mx-auto flex flex-col justify-center items-start gap-20">
+            <h1 class="text-5xl font-bold text-white">
+                Categories
+            </h1>
+        </div>
+    </main>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <div id="categories" class="grid grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200">
+    </footer>
+
+    <script type="module">
+        import Header from "./modules/Header.js"
+        import Footer from "./modules/Footer.js"
+        import axios from "./node_modules/axios/dist/esm/axios.js"
+
+        document.querySelector('header').innerHTML = Header()
+        document.querySelector('footer').innerHTML = Footer()
+
+        const categories_grid = document.querySelector('#categories')
+
+        axios.get(`https://www.themealdb.com/api/json/v1/1/categories.php`)
+        .then(response => {
+            if(response.status === 200) {
+                const categories = response?.data?.categories
+                let categories_html = ''
+
+                for(let category of categories) {
+                    categories_html += `
+                    <div class="border border-gray-200 p-6 rounded-md shadow-md space-y-6">
+                        <img src="${category.strCategoryThumb}" alt=${category.strCategory} />
+                        <h2 class="text-xl font-semibold">${category.strCategory}</h2>
+                        <p>${category.strCategoryDescription.slice(0, 100)}...</p>
+                        <a href="products.html?category=${category.strCategory}" class="text-blue-500 underline hover:cursor-pointer">View products</a>
+                    </div>
+                    `
+                }
+
+                categories_grid.innerHTML = categories_html
+            }
+        })
+        .catch(error => console.log(error))
+    </script>
+</body>
+</html>

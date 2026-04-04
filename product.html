@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product details | Wolt</title>
+    <link rel="shortcut icon" href="https://careers.wolt.com/favicon.ico" type="image/x-icon">
+    <link href="./assets/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    
+    <header>
+    </header>
+
+    <main class=" bg-linear-to-r to-cyan-500 from-blue-600 py-10">
+        <div class="container mx-auto flex flex-col justify-center items-start gap-20">
+            <h1 class="text-3xl font-bold text-white">
+                Products <i class="fa-solid fa-caret-right"></i> <span id="product_label"></span>
+            </h1>
+        </div>
+    </main>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-3 gap-20">
+                <div class="flex flex-col">
+                    <!-- <img src="" id="photo"> -->
+                    <div id="video"></div>
+                </div>
+                <div class="col-span-2">
+                    <p id="instructions"></p>
+
+                    <table class="table w-1/2 my-12">
+                        <tr>
+                            <td class="border border-gray-200 px-4 py-2">Category</td>
+                            <td class="border border-gray-200 px-4 py-2" id="category"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-200 px-4 py-2">Area</td>
+                            <td class="border border-gray-200 px-4 py-2" id="area"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-200 px-4 py-2">Tags</td>
+                            <td class="border border-gray-200 px-4 py-2">
+                                <div class="flex gap-3" id="tags"></div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <form method="POST" id="add-to-cart-form" class="w-1/2">
+                        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+                            <input type="number" name="qty" value="1" min="1" max="10" class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                            <button type="submit" class="px-5 py-2 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 hover:cursor-pointer">Add to cart</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200">
+    </footer>
+
+    <script type="module">
+        import Header from "./modules/Header.js"
+        import Footer from "./modules/Footer.js"
+        import axios from "./node_modules/axios/dist/esm/axios.js"
+        import {getProductId, embedVideo} from "./helpers/url.js"
+        import {render} from "./helpers/tags.js"
+
+        document.querySelector('header').innerHTML = Header()
+        document.querySelector('footer').innerHTML = Footer()
+
+        const product_label = document.querySelector('#product_label')
+
+        const product_id = getProductId(window.location.href)
+
+
+        axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${product_id}`)
+        .then(response => {
+            if(response.status === 200) {
+                const product = response?.data?.meals[0]
+
+                localStorage.setItem('product', JSON.stringify(product))
+
+                product_label.textContent = product.strMeal
+
+                // document.querySelector('#photo').src = `${product.strMealThumb}`
+                document.querySelector('#video').innerHTML = `${embedVideo(`${product.strYoutube}`)}`
+                document.querySelector('#instructions').textContent = `${product.strInstructions}`
+
+                document.querySelector('#category').textContent = `${product.strCategory}`
+                document.querySelector('#area').textContent = `${product.strArea}`
+                document.querySelector('#tags').innerHTML = `${render(product.strTags)}`
+            }
+        })
+        .catch(error => console.log(error))
+
+
+        const form = document.querySelector('form#add-to-cart-form')
+
+        form.addEventListener('submit', event => {
+            event.preventDefault()
+
+            const qty = parseInt(event.target.elements.qty.value)
+
+            const item = {
+                ...JSON.parse(localStorage.getItem('product')),
+                qty: qty
+            }
+
+            const cart = localStorage.getItem('cart') === null ? [] : JSON.parse(localStorage.getItem('cart'))
+
+            if(cart.length > 0) {
+                if(cart.filter(cart_item => cart_item.idMeal === item.idMeal).length > 0) {
+                    localStorage.setItem('cart', JSON.stringify([...cart.map(cart_item => {
+                        if(cart_item.idMeal === item.idMeal) return {...cart_item, qty: cart_item.qty + qty}
+                        else return {...cart_item}
+                    })]))
+                } else {
+                    localStorage.setItem('cart', JSON.stringify([...cart, item]))
+                }
+            } else {
+                localStorage.setItem('cart', JSON.stringify([item]))
+            }
+
+            alert(`${item.strMeal} was added to cart`)
+            event.target.elements.qty.value = 1
+            // window.location.href = `/product.html?id=${item.idMeal}`
+        })
+    </script>
+</body>
+</html>

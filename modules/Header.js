@@ -1,0 +1,33 @@
+
+function Header() {
+    const loggedin = localStorage.getItem('loggedin')
+
+    return `
+        <nav class="relative bg-white shadow dark:bg-gray-800">
+            <div class="container py-4 mx-auto md:flex md:justify-between md:items-center">
+                <div class="flex items-center justify-between">
+                    <a href="index.html">
+                        <img src="assets/images/logo.png" alt="Wolt logo" class="h-18" />
+                    </a>
+                </div>
+                <div class="absolute inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 md:mt-0 md:p-0 md:top-0 md:relative md:bg-transparent md:w-auto md:opacity-100 md:translate-x-0 md:flex md:items-center">
+                    <div class="flex flex-col md:flex-row">
+                        <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="index.html">Home</a>
+                        <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="categories.html">Categories</a>
+                        <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="cart.html">Cart</a>
+                        ${
+                            loggedin ? `
+                                <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="dashboard.html">Dashboard</a>
+                            ` : `
+                                <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="register.html">Register</a>
+                                <a class="my-2 text-gray-700 transition-colors duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 md:mx-4 md:my-0" href="login.html">Login</a>
+                            `
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    `
+}
+
+export default Header

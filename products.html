@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | Wolt</title>
+    <link rel="shortcut icon" href="https://careers.wolt.com/favicon.ico" type="image/x-icon">
+    <link href="./assets/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    
+    <header>
+    </header>
+
+    <main class=" bg-linear-to-r to-cyan-500 from-blue-600 py-10">
+        <div class="container mx-auto flex flex-col justify-center items-start gap-20">
+            <h1 class="text-3xl font-bold text-white">
+                <span id="category"></span> <i class="fa-solid fa-caret-right"></i> Products
+            </h1>
+        </div>
+    </main>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <div id="products" class="grid grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200">
+    </footer>
+
+    <script type="module">
+        import Header from "./modules/Header.js"
+        import Footer from "./modules/Footer.js"
+        import axios from "./node_modules/axios/dist/esm/axios.js"
+        import {getCategory} from "./helpers/url.js"
+
+        document.querySelector('header').innerHTML = Header()
+        document.querySelector('footer').innerHTML = Footer()
+
+        const products_grid = document.querySelector('#products')
+        const category_label = document.querySelector('#category')
+
+        const category = getCategory(window.location.href)
+
+        category_label.textContent = category
+
+        axios.get(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+        .then(response => {
+            if(response.status === 200) {
+                const products = response?.data?.meals
+                let products_html = ''
+
+                for(let product of products) {
+                    products_html += `
+                    <div class="border border-gray-200 p-6 rounded-md shadow-md space-y-6">
+                        <img src="${product.strMealThumb}" alt=${product.strMeal} />
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold">${product.strMeal}</h2>
+                            <a href="product.html?id=${product.idMeal}" class="px-4 py-1 font-medium tracking-wide text-blue-500 capitalize transition-colors duration-300 transform border border-blue-400 rounded-lg hover:cursor-pointer hover:bg-gray-100">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    `
+                }
+
+                products_grid.innerHTML = products_html
+            }
+        })
+        .catch(error => console.log(error))
+    </script>
+</body>
+</html>

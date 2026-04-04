@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | Wolt</title>
+    <link rel="shortcut icon" href="https://careers.wolt.com/favicon.ico" type="image/x-icon">
+    <link href="./assets/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    
+    <header>
+    </header>
+
+    <main class=" bg-linear-to-r to-cyan-500 from-blue-600 py-10">
+        <div class="container mx-auto flex flex-col justify-center items-start gap-20">
+            <h1 class="text-3xl font-bold text-white">
+                Cart
+            </h1>
+        </div>
+    </main>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <table class="w-full table" id="cart">
+
+            </table>
+        </div>
+    </section>
+
+    <section class="py-20 bg-gray-100 hidden" id="checkout">
+        <div class="container mx-auto">
+            <form method="POST" id="checkout-form">
+                <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="phone">Phone number</label>
+                        <input id="phone" type="text" name="phone" required class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="address">Delivery address</label>
+                        <input id="address" type="text" name="address" required class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+                </div>
+
+                <div class="flex justify-end items-center mt-6 gap-6">
+                    <button type="submit" class="px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600">Checkout</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200">
+    </footer>
+
+
+    <script src="helpers/dynamicListener.js"></script>
+    <script type="module">
+        import Header from "./modules/Header.js"
+        import Footer from "./modules/Footer.js"
+        import axios from "./node_modules/axios/dist/esm/axios.js"
+        import {getProductId, embedVideo} from "./helpers/url.js"
+        import {render} from "./helpers/tags.js"
+
+        document.querySelector('header').innerHTML = Header()
+        document.querySelector('footer').innerHTML = Footer()
+
+        
+        const cart_table = document.querySelector('table#cart')
+        const cart = localStorage.getItem('cart') === null ? [] : JSON.parse(localStorage.getItem('cart')).filter(item => Object.keys(item).length > 0)
+        let cart_html = ''
+        let total = 0.00
+
+        if(cart.length > 0) {
+            for(let item of cart) {
+                if(Object.keys(item).length > 0) {
+                    total += (item.qty * (item.idMeal / 1000))
+                    cart_html += `
+                    <tr>
+                        <td class="border border-gray-300 px-6 py-2">${item.strMeal}</td>
+                        <td class="border border-gray-300 px-6 py-2">
+                            <div class="flex justify-center items-center gap-4">
+                                <button item="${item.idMeal}" id="decBtn" class="text-underline text-blue-700 border rounded-md border-gray-200 w-6 hover:bg-gray-100 hover:cursor-pointer">-</button>
+                                ${item.qty}
+                                <button item="${item.idMeal}" id="incBtn"  class="text-underline text-blue-700 border rounded-md border-gray-200 w-6 hover:bg-gray-100 hover:cursor-pointer">+</button>
+                            </div>
+                        </td>
+                        <td class="border border-gray-300 px-6 py-2 text-right">${(item.idMeal / 1000).toFixed(2)} EUR</td>
+                        <td class="border border-gray-300 px-6 py-2 text-right">${(item.qty * (item.idMeal / 1000)).toFixed(2)} EUR</td>
+                    </td>
+                    `
+                }
+            }
+
+            cart_html += `
+            <tr>
+                <td colspan="3">
+                <td class="border border-gray-300 px-6 py-2 text-right">${total.toFixed(2)} EUR</td>
+            </tr>
+            `
+
+            cart_table.innerHTML = cart_html
+        } else {
+            cart_table.innerHTML = `
+            <tr>
+                <td class="border border-gray-300 px-6 py-2 text-center">Cart is empty</td>
+            </tr>
+            `
+        }
+
+
+        // Update item qty (increase & decrease)
+        addDynamicEventListener(document.body, 'click', '#decBtn', function (e) {
+            const item_id = e.target.getAttribute('item')
+
+            localStorage.setItem('cart', JSON.stringify([...cart.map(item => {
+                if((item.idMeal === item_id)) {
+                    if(item.qty > 1) {
+                        return {...item, qty: item.qty - 1}
+                    } else {
+                        return {}
+                    }
+                } else {
+                    return {...item}
+                }
+            })]))
+
+            window.location.href = `/cart.html`
+        })
+
+        addDynamicEventListener(document.body, 'click', '#incBtn', function (e) {
+            const item_id = e.target.getAttribute('item')
+
+            localStorage.setItem('cart', JSON.stringify([...cart.map(item => {
+                return (item.idMeal === item_id) ? {...item, qty: item.qty + 1} : {...item}
+            })]))
+
+            window.location.href = `/cart.html`
+        })
+
+
+        // Checkout
+        const form = document.querySelector('form#checkout-form')
+        const orders = localStorage.getItem('orders') === null ? [] : JSON.parse(localStorage.getItem('orders'))
+
+        form.addEventListener('submit', event => {
+            event.preventDefault()
+
+            const form_data = event.target.elements
+
+            const order = {
+                products: cart,
+                phoneNumber: form_data.phone.value,
+                deliveryAddress : form_data.address.value,
+                email: localStorage.getItem('email')
+            }
+
+            if(orders.length > 0) {
+                localStorage.setItem('orders', JSON.stringify([...orders, order]))
+            } else {
+                localStorage.setItem('orders', JSON.stringify([order]))
+            }
+
+            alert('Order completed successfully')
+            localStorage.setItem('cart', JSON.stringify([]))
+
+            window.location.href = `/dashboard.html`
+        })
+
+        
+        const loggedin = localStorage.getItem('loggedin')
+
+        if(loggedin && cart.length > 0) {
+            const checkout = document.querySelector('#checkout')
+            checkout.classList.remove('hidden')
+        }
+    </script>
+</body>
+</html>

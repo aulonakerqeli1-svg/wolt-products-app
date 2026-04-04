@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Wolt</title>
+    <link rel="shortcut icon" href="https://careers.wolt.com/favicon.ico" type="image/x-icon">
+    <link href="./assets/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    
+    <header>
+    </header>
+
+    <main class=" bg-linear-to-r to-cyan-500 from-blue-600 py-12">
+        <div class="container mx-auto flex flex-col justify-center items-start gap-20">
+            <h1 class="text-4xl font-bold text-white">
+                Register
+            </h1>
+        </div>
+    </main>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <form method="POST" id="register-form">
+                <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="fullname">Fullname</label>
+                        <input id="fullname" type="text" name="fullname" required class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="emailAddress">Email Address</label>
+                        <input id="emailAddress" type="text" name="email" required class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="password">Password</label>
+                        <input id="password" type="password" name="password" required class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+
+                    <div>
+                        <label class="text-gray-700 dark:text-gray-200" for="passwordConfirmation">Password Confirmation</label>
+                        <input id="passwordConfirmation" type="password" required name="passwordConfirmation" class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring">
+                    </div>
+                </div>
+
+                <div class="flex justify-end items-center mt-6 gap-6">
+                    <button type="submit" class="px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600">Register</button>
+                    <a href="login.html" class="text-blue-500 underline">Already registered?</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200">
+    </footer>
+
+    <script type="module">
+        import Header from "./modules/Header.js"
+        import Footer from "./modules/Footer.js"
+        import axios from "./node_modules/axios/dist/esm/axios.js"
+        import {isEmail} from "./helpers/validators.js"
+
+        document.querySelector('header').innerHTML = Header()
+        document.querySelector('footer').innerHTML = Footer()
+
+        const users = localStorage.getItem('users') === null ? [] : JSON.parse(localStorage.getItem('users'))
+
+        const form = document.querySelector('#register-form')
+
+        form.addEventListener('submit', event => {
+            event.preventDefault()
+
+            const elements = event.target.elements
+
+            const fullname = elements.fullname.value
+            const email = elements.email.value
+            const password = elements.password.value
+            const passwordConfirmation = elements.passwordConfirmation.value
+
+            const user = {
+                fullname,
+                email,
+                password
+            }
+
+            if(password !== passwordConfirmation) {
+                alert(`Passwords does not match!`)
+                return;
+            }
+
+            if(!isEmail(email)) {
+                alert(`Email is not valid!`)
+                return;
+            }
+
+            if(users.length > 0) {
+                const ls_user = users.filter(user => user.email == email)
+
+                if(ls_user.length > 0) {
+                    alert(`${email} already in user!`)
+                    return;
+                } else {
+                    localStorage.setItem('users', JSON.stringify([...users, user]))
+                }
+            } else {
+                localStorage.setItem('users', JSON.stringify([user]))
+            }
+
+            alert(`User was registred successfully`)
+            window.location.href = `/login.html`
+        })
+    </script>
+</body>
+</html>
